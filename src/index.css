@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Soft Neutral Palette */
+    --background: 30 20% 98%; /* #FAF8F6 */
+    --foreground: 25 40% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 25 40% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 40% 20%;
+
+    --primary: 25 45% 40%; /* #A27B5C - soft brown */
+    --primary-foreground: 30 15% 95%;
+
+    --secondary: 30 30% 85%; /* #D8C3A5 - light taupe */
+    --secondary-foreground: 25 40% 20%;
+
+    --muted: 30 20% 94%;
+    --muted-foreground: 25 15% 50%;
+
+    --accent: 30 30% 85%;
+    --accent-foreground: 25 40% 20%;
+
+    --destructive: 0 65% 55%; /* muted red */
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 35 85% 60%; /* amber */
+    --warning-foreground: 25 40% 20%;
+
+    --success: 142 50% 50%; /* soft green */
+    --success-foreground: 0 0% 100%;
+
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 25 45% 40%;
+
+    --radius: 0.75rem;
+    
+    /* Custom gradient */
+    --gradient-warm: linear-gradient(135deg, hsl(30 25% 90%) 0%, hsl(350 60% 85%) 100%);
+    
+    /* Chart colors - soft neutral palette */
+    --chart-1: 25 45% 40%; /* #A27B5C */
+    --chart-2: 30 30% 70%; /* #D8C3A5 */
+    --chart-3: 25 35% 50%; /* #8B7355 */
+    --chart-4: 30 25% 75%; /* #C4A484 */
+    --chart-5: 25 30% 35%; /* #6B5B4F */
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 25 20% 12%;
+    --foreground: 30 15% 95%;
+
+    --card: 25 20% 15%;
+    --card-foreground: 30 15% 95%;
+
+    --popover: 25 20% 15%;
+    --popover-foreground: 30 15% 95%;
+
+    --primary: 30 15% 95%;
+    --primary-foreground: 25 40% 20%;
+
+    --secondary: 25 15% 20%;
+    --secondary-foreground: 30 15% 95%;
+
+    --muted: 25 15% 20%;
+    --muted-foreground: 30 15% 70%;
+
+    --accent: 350 50% 40%;
+    --accent-foreground: 30 15% 95%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 25 15% 25%;
+    --input: 25 15% 25%;
+    --ring: 30 15% 95%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
