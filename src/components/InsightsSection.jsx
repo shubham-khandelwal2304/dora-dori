@@ -128,7 +128,7 @@ const insightsData = [
   },
   {
     type: "fabric-bottleneck",
-    title: "Fabric Bottleneck – Cotton Slub (White)",
+    title: "Fabric Bottleneck",
     icon: Layers,
     priority: "high",
     fabric: { type: "Cotton Slub (White)" },
@@ -555,7 +555,7 @@ const InsightsSection = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-3">
-        <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+        <h2 className="text-base sm:text-base font-semibold flex items-center gap-2">
           <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
           Dashboard Insights
         </h2>
@@ -600,27 +600,34 @@ const InsightsSection = () => {
         {Object.entries(groupedInsights).map(([type, categoryData]) => {
           const Icon = categoryData.icon;
           const firstItem = categoryData.items[0];
-            const queryRowsForType = getQueryResultForType(type);
-            const firstRow = queryRowsForType[0];
-            const mappedIndex = aiInsightIndexByType[type];
-            const hasSqlMapping = !!mappedIndex;
-            const stylesCount = hasSqlMapping
-              ? (queryRowsForType && queryRowsForType.length) || 0
-              : categoryData.items.length;
+          const queryRowsForType = getQueryResultForType(type);
+          const firstRow = queryRowsForType[0];
+          const mappedIndex = aiInsightIndexByType[type];
+          const hasSqlMapping = !!mappedIndex;
+          const stylesCount = hasSqlMapping
+            ? (queryRowsForType && queryRowsForType.length) || 0
+            : categoryData.items.length;
+
+          // Special colors for specific cards:
+          // - "high-potential"    -> red (destructive)
+          // - "new-launch"        -> yellow (warning)
+          const borderLeftColor =
+            type === "high-potential"
+              ? "hsl(var(--destructive))"
+              : type === "new-launch"
+              ? "hsl(var(--warning))"
+              : categoryData.priority === "high"
+              ? "hsl(var(--destructive))"
+              : categoryData.priority === "medium"
+              ? "hsl(var(--warning))"
+              : "hsl(var(--muted))";
           
           return (
             <Card 
               key={type} 
-                className="hover:shadow-lg transition-shadow border-l-4 cursor-pointer"
-              style={{
-                  borderLeftColor:
-                    categoryData.priority === "high"
-                      ? "hsl(var(--destructive))"
-                      : categoryData.priority === "medium"
-                      ? "hsl(var(--warning))"
-                      : "hsl(var(--muted))",
-                }}
-                onClick={() => handleViewMore(type)}
+              className="hover:shadow-lg transition-shadow border-l-4 cursor-pointer"
+              style={{ borderLeftColor }}
+              onClick={() => handleViewMore(type)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
@@ -634,7 +641,7 @@ const InsightsSection = () => {
                             : "text-muted-foreground"
                         }`}
                       />
-                    <CardTitle className="text-sm font-semibold leading-tight">
+                    <CardTitle className="text-base font-semibold leading-tight">
                       {categoryData.title}
                     </CardTitle>
                   </div>
@@ -784,7 +791,7 @@ const InsightsSection = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-5xl max-h-[85vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-base">
               {selectedCategory && (
                 <>
                   {(() => {
