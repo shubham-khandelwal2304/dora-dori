@@ -12,10 +12,13 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../../.env.local') });
 dotenv.config({ path: join(__dirname, '../../.env') });
 
-// Use environment variable or fallback to the Supabase connection string
-// Your Supabase connection URL
-const DATABASE_URL = process.env.DATABASE_URL || 
-  'postgresql://postgres:excollo123excollo@db.gmjgjwtkbpctpapxdury.supabase.co:5432/postgres';
+// Use environment variable - DO NOT hardcode credentials!
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is not set!');
+  console.error('Please set DATABASE_URL in your .env.local file or environment variables.');
+}
 
 // Log connection attempt (without password)
 const urlForLog = DATABASE_URL.replace(/:([^:@]+)@/, ':****@');
