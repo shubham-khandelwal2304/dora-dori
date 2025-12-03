@@ -44,8 +44,11 @@ export default async function handler(req, res) {
       averageReturnRateChange: '+0%',
     });
   } catch (error) {
-    console.error('Error running KPI query:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch KPI data' });
+    console.error('Error running KPI query:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fetch KPI data',
+      details: error.message || String(error),
+    });
   }
 }
 
