@@ -733,12 +733,80 @@ const InsightsSection = () => {
                           </span>
                         </div>
                       )}
+                      {(() => {
+                        const sizeMeta = [
+                          { label: "S", sizeKey: "sizeSBroken", sizeKeySnake: "size_s_broken", mKey: "myntraBrokenS", mKeySnake: "myntra_broken_s", mKeyCamel: "myntraSizeSBroken", nKey: "nykaaBrokenS", nKeySnake: "nykaa_broken_s", nKeyCamel: "nykaaSizeSBroken" },
+                          { label: "M", sizeKey: "sizeMBroken", sizeKeySnake: "size_m_broken", mKey: "myntraBrokenM", mKeySnake: "myntra_broken_m", mKeyCamel: "myntraSizeMBroken", nKey: "nykaaBrokenM", nKeySnake: "nykaa_broken_m", nKeyCamel: "nykaaSizeMBroken" },
+                          { label: "L", sizeKey: "sizeLBroken", sizeKeySnake: "size_l_broken", mKey: "myntraBrokenL", mKeySnake: "myntra_broken_l", mKeyCamel: "myntraSizeLBroken", nKey: "nykaaBrokenL", nKeySnake: "nykaa_broken_l", nKeyCamel: "nykaaSizeLBroken" },
+                          { label: "XL", sizeKey: "sizeXlBroken", sizeKeySnake: "size_xl_broken", mKey: "myntraBrokenXl", mKeySnake: "myntra_broken_xl", mKeyCamel: "myntraSizeXlBroken", nKey: "nykaaBrokenXl", nKeySnake: "nykaa_broken_xl", nKeyCamel: "nykaaSizeXlBroken" },
+                        ];
+
+                        const truthy = (val) =>
+                          val === true ||
+                          val === "true" ||
+                          val === "t" ||
+                          val === "1" ||
+                          val === 1;
+
+                        const brokenSizes = sizeMeta
+                          .map((size) => {
+                            const sizeBroken =
+                              truthy(firstRow[size.sizeKey]) ||
+                              truthy(firstRow[size.sizeKeySnake]) ||
+                              truthy(firstRow[size.mKeyCamel]) ||
+                              truthy(firstRow[size.mKey]) ||
+                              truthy(firstRow[size.mKeySnake]) ||
+                              truthy(firstRow[size.nKeyCamel]) ||
+                              truthy(firstRow[size.nKey]) ||
+                              truthy(firstRow[size.nKeySnake]);
+
+                            if (!sizeBroken) return null;
+
+                            const platforms = [];
+                            if (truthy(firstRow[size.mKeyCamel] ?? firstRow[size.mKey] ?? firstRow[size.mKeySnake])) {
+                              platforms.push("Myntra");
+                            }
+                            if (truthy(firstRow[size.nKeyCamel] ?? firstRow[size.nKey] ?? firstRow[size.nKeySnake])) {
+                              platforms.push("Nykaa");
+                            }
+
+                            if (!platforms.length) return null;
+
+                            return { label: size.label, platforms };
+                          })
+                          .filter(Boolean);
+
+                        if (!brokenSizes.length) return null;
+
+                        return (
+                          <div>
+                            Broken sizes:{" "}
+                            <span className="text-foreground font-medium">
+                              {brokenSizes
+                                .map((s) =>
+                                  s.platforms.length
+                                    ? `${s.label} (${s.platforms.join(", ")})`
+                                    : s.label
+                                )
+                                .join("; ")}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       {firstRow.fabricType && (
                         <div>
                           Fabric:{" "}
                           <span className="text-foreground font-medium">
                             {firstRow.fabricType}
                             {firstRow.color ? ` – ${firstRow.color}` : ""}
+                          </span>
+                        </div>
+                      )}
+                      {firstRow.totalFabricAvailableMeters !== undefined && (
+                        <div>
+                          Fabric available:{" "}
+                          <span className="text-foreground font-medium">
+                            {firstRow.totalFabricAvailableMeters} m
                           </span>
                         </div>
                       )}
@@ -908,6 +976,16 @@ const InsightsSection = () => {
                               </span>
                             </div>
                           )}
+                          {row.totalFabricAvailableMeters !== undefined && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">
+                                Fabric available:
+                              </span>
+                              <span className="font-semibold">
+                                {row.totalFabricAvailableMeters} m
+                              </span>
+                            </div>
+                          )}
                           {row.estDaysOfCover !== undefined && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
@@ -918,6 +996,72 @@ const InsightsSection = () => {
                               </span>
                             </div>
                           )}
+                          {(() => {
+                            const sizeMeta = [
+                              { label: "S", sizeKey: "sizeSBroken", sizeKeySnake: "size_s_broken", mKey: "myntraBrokenS", mKeySnake: "myntra_broken_s", mKeyCamel: "myntraSizeSBroken", nKey: "nykaaBrokenS", nKeySnake: "nykaa_broken_s", nKeyCamel: "nykaaSizeSBroken" },
+                              { label: "M", sizeKey: "sizeMBroken", sizeKeySnake: "size_m_broken", mKey: "myntraBrokenM", mKeySnake: "myntra_broken_m", mKeyCamel: "myntraSizeMBroken", nKey: "nykaaBrokenM", nKeySnake: "nykaa_broken_m", nKeyCamel: "nykaaSizeMBroken" },
+                              { label: "L", sizeKey: "sizeLBroken", sizeKeySnake: "size_l_broken", mKey: "myntraBrokenL", mKeySnake: "myntra_broken_l", mKeyCamel: "myntraSizeLBroken", nKey: "nykaaBrokenL", nKeySnake: "nykaa_broken_l", nKeyCamel: "nykaaSizeLBroken" },
+                              { label: "XL", sizeKey: "sizeXlBroken", sizeKeySnake: "size_xl_broken", mKey: "myntraBrokenXl", mKeySnake: "myntra_broken_xl", mKeyCamel: "myntraSizeXlBroken", nKey: "nykaaBrokenXl", nKeySnake: "nykaa_broken_xl", nKeyCamel: "nykaaSizeXlBroken" },
+                            ];
+
+                            const truthy = (val) =>
+                              val === true ||
+                              val === "true" ||
+                              val === "t" ||
+                              val === "1" ||
+                              val === 1;
+
+                            const brokenSizes = sizeMeta
+                              .map((size) => {
+                                const sizeBroken =
+                                  truthy(row[size.sizeKey]) ||
+                                  truthy(row[size.sizeKeySnake]) ||
+                                  truthy(row[size.mKeyCamel]) ||
+                                  truthy(row[size.mKey]) ||
+                                  truthy(row[size.mKeySnake]) ||
+                                  truthy(row[size.nKeyCamel]) ||
+                                  truthy(row[size.nKey]) ||
+                                  truthy(row[size.nKeySnake]);
+
+                                if (!sizeBroken) return null;
+
+                                const platforms = [];
+                                if (truthy(row[size.mKeyCamel] ?? row[size.mKey] ?? row[size.mKeySnake])) {
+                                  platforms.push("Myntra");
+                                }
+                                if (truthy(row[size.nKeyCamel] ?? row[size.nKey] ?? row[size.nKeySnake])) {
+                                  platforms.push("Nykaa");
+                                }
+
+                                if (!platforms.length) return null;
+
+                                return { label: size.label, platforms };
+                              })
+                              .filter(Boolean);
+
+                            if (!brokenSizes.length) return null;
+
+                            return (
+                              <div className="pt-2 border-t space-y-1.5">
+                                <div className="text-muted-foreground">
+                                  Broken sizes (raw):
+                                </div>
+                                {brokenSizes.map((size) => (
+                                  <div
+                                    key={size.label}
+                                    className="text-[11px]"
+                                  >
+                                    <span className="font-semibold text-foreground">
+                                      Size {size.label}
+                                    </span>{" "}
+                                    <span className="text-destructive">
+                                      Broken on {size.platforms.join(", ")}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     ))
@@ -1017,4 +1161,3 @@ const InsightsSection = () => {
 };
 
 export default InsightsSection;
-
