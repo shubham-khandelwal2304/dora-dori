@@ -793,23 +793,33 @@ const InsightsSection = () => {
                           </div>
                         );
                       })()}
-                      {firstRow.fabricType && (
-                        <div>
-                          Fabric:{" "}
-                          <span className="text-foreground font-medium">
-                            {firstRow.fabricType}
-                            {firstRow.color ? ` – ${firstRow.color}` : ""}
-                          </span>
-                        </div>
-                      )}
-                      {firstRow.totalFabricAvailableMeters !== undefined && (
-                        <div>
-                          Fabric available:{" "}
-                          <span className="text-foreground font-medium">
-                            {firstRow.totalFabricAvailableMeters} m
-                          </span>
-                        </div>
-                      )}
+                      {(() => {
+                        const fabricType = firstRow.fabricType ?? firstRow.fabric_type;
+                        const fabricAvailable =
+                          firstRow.totalFabricAvailableMeters ??
+                          firstRow.total_fabric_available_mtr;
+
+                        return (
+                          <>
+                            {fabricType && (
+                              <div>
+                                Fabric:{" "}
+                                <span className="text-foreground font-medium">
+                                  {fabricType}
+                                </span>
+                              </div>
+                            )}
+                            {fabricAvailable !== undefined && (
+                              <div>
+                                Fabric available:{" "}
+                                <span className="text-foreground font-medium">
+                                  {fabricAvailable} m
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   ) : hasSqlMapping ? (
                     <div className="text-xs text-muted-foreground">
@@ -905,15 +915,14 @@ const InsightsSection = () => {
                           </div>
                         )}
 
-                        {(row.fabricType || row.color) && (
+                        {row.fabricType || row.fabric_type ? (
                           <div className="text-sm">
                             <span className="text-muted-foreground">Fabric: </span>
                             <span className="font-medium">
-                              {row.fabricType}
-                              {row.color ? ` – ${row.color}` : ""}
+                              {row.fabricType ?? row.fabric_type}
                             </span>
                           </div>
-                        )}
+                        ) : null}
 
                         <div className="space-y-1.5">
                           {row.dailyTotalSales !== undefined && (
@@ -976,16 +985,21 @@ const InsightsSection = () => {
                               </span>
                             </div>
                           )}
-                          {row.totalFabricAvailableMeters !== undefined && (
+                          {(() => {
+                            const fabricAvailable =
+                              row.totalFabricAvailableMeters ??
+                              row.total_fabric_available_mtr;
+                            return fabricAvailable !== undefined ? (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
                                 Fabric available:
                               </span>
                               <span className="font-semibold">
-                                {row.totalFabricAvailableMeters} m
+                                {fabricAvailable} m
                               </span>
                             </div>
-                          )}
+                            ) : null;
+                          })()}
                           {row.estDaysOfCover !== undefined && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
