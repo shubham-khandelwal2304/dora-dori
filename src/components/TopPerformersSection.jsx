@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, ChevronRight } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
@@ -76,9 +76,11 @@ const TopPerformersSection = () => {
                 <div className="font-medium text-sm sm:text-base truncate">
                   {item.styleName || item.name}
                 </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">
-                  {item.primaryPlatform || item.platform}
-                </div>
+                {(item.styleId || item.id) && (
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">
+                    {item.styleId || item.id}
+                  </div>
+                )}
                 {item.oneMonthSalesUnits !== undefined && (
                   <div className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
                     1-month sales:{" "}
@@ -88,7 +90,7 @@ const TopPerformersSection = () => {
                   </div>
                 )}
               </div>
-              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0 ml-2" />
+              {/* ChevronRight icon removed */}
             </button>
           ))}
         </div>
@@ -98,5 +100,3 @@ const TopPerformersSection = () => {
 };
 
 export default TopPerformersSection;
-
-

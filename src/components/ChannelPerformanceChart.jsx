@@ -188,7 +188,7 @@ const ChannelPerformanceChart = () => {
                   : ""}
                 Total ad spend: {formatCurrency(totalSpend)}, Est. revenue: {formatCurrency(totalRevenue)}.
                 {totalSpend > 0 && ` Overall est. ROAS: ${(totalRevenue / totalSpend).toFixed(1)}x. `}
-                <span className="text-[10px] opacity-75">Revenue estimated using 2% CVR & global AOV.</span>
+                {/* <span className="text-[10px] opacity-75">Revenue estimated using 2% CVR & global AOV.</span> */}
               </span>
             </p>
           </>

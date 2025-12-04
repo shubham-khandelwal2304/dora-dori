@@ -72,7 +72,7 @@ const FabricStatusSection = () => {
                     </div>
                     <div className="flex-shrink-0 text-right">
                       <div className="font-bold text-sm sm:text-base text-amber-600">
-                        {style.daysOfCover} days
+                        {style.daysOfCover} days of cover
                       </div>
                     </div>
                   </div>

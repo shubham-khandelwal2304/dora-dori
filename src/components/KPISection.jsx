@@ -96,7 +96,7 @@ const KPISection = () => {
       description: "Count of unique style_id with inventory or sales",
     },
     {
-      title: "Styles at Risk",
+      title: "Styles at Risk (30 days or less)",
       value: displayData?.stylesAtRiskCount?.toLocaleString() || "0",
       change: displayData?.stylesAtRiskChange || "+0",
       trend: displayData?.stylesAtRiskChange?.startsWith('-') ? "up" : "down",

@@ -795,9 +795,9 @@ const InsightsSection = () => {
                       })()}
                       {(() => {
                         const fabricType = firstRow.fabricType ?? firstRow.fabric_type;
-                        const fabricAvailable =
-                          firstRow.totalFabricAvailableMeters ??
-                          firstRow.total_fabric_available_mtr;
+                        const fabricRemaining =
+                          firstRow.totalFabricRemainingMeters ??
+                          firstRow.total_fabric_remaining_meters;
 
                         return (
                           <>
@@ -809,11 +809,11 @@ const InsightsSection = () => {
                                 </span>
                               </div>
                             )}
-                            {fabricAvailable !== undefined && (
+                            {fabricRemaining !== undefined && (
                               <div>
-                                Fabric available:{" "}
+                                Fabric remaining:{" "}
                                 <span className="text-foreground font-medium">
-                                  {fabricAvailable} m
+                                  {fabricRemaining} m
                                 </span>
                               </div>
                             )}
@@ -986,16 +986,16 @@ const InsightsSection = () => {
                             </div>
                           )}
                           {(() => {
-                            const fabricAvailable =
-                              row.totalFabricAvailableMeters ??
-                              row.total_fabric_available_mtr;
-                            return fabricAvailable !== undefined ? (
+                            const fabricRemaining =
+                              row.totalFabricRemainingMeters ??
+                              row.total_fabric_remaining_meters;
+                            return fabricRemaining !== undefined ? (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
-                                Fabric available:
+                                Fabric remaining:
                               </span>
                               <span className="font-semibold">
-                                {fabricAvailable} m
+                                {fabricRemaining} m
                               </span>
                             </div>
                             ) : null;
