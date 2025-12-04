@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const query = `
       SELECT
         COUNT(DISTINCT style_id) FILTER (WHERE ats_pooled > 0 OR one_month_total_sales > 0) AS total_active_styles,
-        COUNT(*) FILTER (WHERE total_days_of_cover < 15) AS styles_at_risk_count,
+        COUNT(*) FILTER (WHERE total_days_of_cover < 30) AS styles_at_risk_count,
         COALESCE(SUM(total_revenue), 0) AS revenue_last_30d,
         AVG(return_average_percent) FILTER (WHERE one_month_total_sales > 0) AS avg_return_rate_pct
       FROM ${tableName}

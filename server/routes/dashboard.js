@@ -17,8 +17,8 @@ router.get('/kpis', async (req, res) => {
           WHERE ats_pooled > 0 OR one_month_total_sales > 0
         ) AS total_active_styles,
         
-        -- KPI 2: Styles at Risk Count (total_days_of_cover < 15)
-        COUNT(*) FILTER (WHERE total_days_of_cover < 15) AS styles_at_risk_count,
+        -- KPI 2: Styles at Risk Count (total_days_of_cover < 30)
+        COUNT(*) FILTER (WHERE total_days_of_cover < 30) AS styles_at_risk_count,
         
         -- KPI 3: Revenue (Last 30 Days)
         COALESCE(SUM(total_revenue), 0) AS revenue_last_30d,
