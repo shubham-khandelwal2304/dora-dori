@@ -58,7 +58,7 @@ const TopPerformersSection = () => {
               Top Performing SKUs
             </CardTitle>
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              Sorted by 30-day STR
+              Sorted by 30-day Sales
             </p>
           </div>
         </div>
