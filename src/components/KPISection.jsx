@@ -1,4 +1,3 @@
-import { TrendingUp, TrendingDown, Package, AlertTriangle, IndianRupee, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 
@@ -92,7 +91,6 @@ const KPISection = () => {
       value: displayData?.totalActiveStyles?.toLocaleString() || "0",
       change: displayData?.totalActiveStylesChange || "+0",
       trend: displayData?.totalActiveStylesChange?.startsWith('+') ? "up" : "down",
-      icon: Package,
       description: "Count of unique style_id with inventory or sales",
     },
     {
@@ -100,7 +98,6 @@ const KPISection = () => {
       value: displayData?.stylesAtRiskCount?.toLocaleString() || "0",
       change: displayData?.stylesAtRiskChange || "+0",
       trend: displayData?.stylesAtRiskChange?.startsWith('-') ? "up" : "down",
-      icon: AlertTriangle,
       description: "Styles with < 15 days of cover",
     },
     {
@@ -108,7 +105,6 @@ const KPISection = () => {
       value: formatIndianCurrency(displayData?.revenueLast30d),
       change: displayData?.revenueLast30dChange || "+0",
       trend: displayData?.revenueLast30dChange?.startsWith('+') ? "up" : "down",
-      icon: IndianRupee,
       description: "Total revenue in last 30 days",
     },
     {
@@ -116,7 +112,6 @@ const KPISection = () => {
       value: (displayData?.averageReturnRate?.toFixed(1) || "0") + "%",
       change: displayData?.averageReturnRateChange || "+0%",
       trend: displayData?.averageReturnRateChange?.startsWith('-') ? "up" : "down",
-      icon: RotateCcw,
       description: "Average return rate across all styles",
     },
   ];
@@ -141,18 +136,16 @@ const KPISection = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
         {kpis.map((kpi, index) => {
-          const Icon = kpi.icon;
           return (
             <Card
               key={index}
               className="hover:shadow-lg transition-shadow border-border/60 cursor-pointer"
               onClick={() => handleCardClick(kpi.title)}
             >
-              <CardHeader className="flex flex-row items-center justify-between pb-3 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardHeader className="flex flex-row items-start pb-2 space-y-0 min-h-[3.1rem]">
+                <CardTitle className="text-sm font-medium text-muted-foreground leading-snug whitespace-nowrap">
                   {kpi.title}
                 </CardTitle>
-                <Icon className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline">

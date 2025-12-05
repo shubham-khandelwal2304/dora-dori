@@ -656,7 +656,14 @@ const InsightsSection = () => {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="text-2xl font-bold text-foreground">
-                      {stylesCount} {stylesCount === 1 ? "style" : "styles"}
+                      {stylesCount}{" "}
+                      {type === "fabric-bottleneck"
+                        ? stylesCount === 1
+                          ? "fabric"
+                          : "fabrics"
+                        : stylesCount === 1
+                        ? "style"
+                        : "styles"}
                   </div>
                   <Button
                     variant="outline"
@@ -725,7 +732,7 @@ const InsightsSection = () => {
                           </span>
                         </div>
                       )}
-                      {firstRow.roas !== undefined && (
+                      {type !== "high-potential" && firstRow.roas !== undefined && (
                         <div>
                           ROAS:{" "}
                           <span className="text-foreground font-medium">
@@ -885,7 +892,15 @@ const InsightsSection = () => {
               )}
             </DialogTitle>
             <DialogDescription>
-              {selectedCount} {selectedCount === 1 ? "style requires" : "styles require"} attention
+              {selectedCount}{" "}
+              {selectedCategory?.type === "fabric-bottleneck"
+                ? selectedCount === 1
+                  ? "fabric requires"
+                  : "fabrics require"
+                : selectedCount === 1
+                ? "style requires"
+                : "styles require"}{" "}
+              attention
             </DialogDescription>
           </DialogHeader>
           
@@ -975,7 +990,7 @@ const InsightsSection = () => {
                               </span>
                             </div>
                           )}
-                          {row.roas !== undefined && (
+                          {selectedCategory?.type !== "high-potential" && row.roas !== undefined && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
                                 ROAS:
