@@ -231,12 +231,18 @@ const insightsData = [
   }
 ];
 
-const getPriorityColor = (priority) => {
-  switch (priority) {
+const getSeverity = (count) => {
+  if (count <= 5) return 'low';
+  if (count <= 10) return 'medium';
+  return 'high';
+};
+
+const getSeverityVariant = (severity) => {
+  switch (severity) {
     case "high":
       return "destructive";
     case "medium":
-      return "default";
+      return "warning";
     case "low":
       return "secondary";
     default:
@@ -607,6 +613,8 @@ const InsightsSection = () => {
           const stylesCount = hasSqlMapping
             ? (queryRowsForType && queryRowsForType.length) || 0
             : categoryData.items.length;
+          
+          const severity = getSeverity(stylesCount);
 
           // Special colors for specific cards:
           // - "high-potential"    -> red (destructive)
@@ -616,9 +624,9 @@ const InsightsSection = () => {
               ? "hsl(var(--destructive))"
               : type === "new-launch"
               ? "hsl(var(--warning))"
-              : categoryData.priority === "high"
+              : severity === "high"
               ? "hsl(var(--destructive))"
-              : categoryData.priority === "medium"
+              : severity === "medium"
               ? "hsl(var(--warning))"
               : "hsl(var(--muted))";
           
@@ -634,9 +642,9 @@ const InsightsSection = () => {
                   <div className="flex items-start gap-2 flex-1">
                       <Icon
                         className={`h-5 w-5 mt-0.5 ${
-                          categoryData.priority === "high"
+                          severity === "high"
                             ? "text-destructive"
-                            : categoryData.priority === "medium"
+                            : severity === "medium"
                             ? "text-warning"
                             : "text-muted-foreground"
                         }`}
@@ -646,10 +654,10 @@ const InsightsSection = () => {
                     </CardTitle>
                   </div>
                     <Badge
-                      variant={getPriorityColor(categoryData.priority)}
+                      variant={getSeverityVariant(severity)}
                       className="text-xs shrink-0"
                     >
-                    {categoryData.priority}
+                    {severity}
                   </Badge>
                 </div>
               </CardHeader>

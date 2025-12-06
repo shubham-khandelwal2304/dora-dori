@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, Send, X, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,10 @@ const FormattedMessage = ({ content }) => {
   const formattedElements = [];
   let currentListItems = [];
   let listKey = null;
-  
+
   // Split by lines
   const lines = content.split('\n');
-  
+
   const flushList = () => {
     if (currentListItems.length > 0) {
       formattedElements.push(
@@ -31,7 +31,7 @@ const FormattedMessage = ({ content }) => {
       listKey = null;
     }
   };
-  
+
   lines.forEach((line, lineIndex) => {
     const trimmed = line.trim();
     if (!trimmed) {
@@ -45,7 +45,7 @@ const FormattedMessage = ({ content }) => {
       const colonIndex = trimmed.indexOf(':');
       const beforeColon = trimmed.substring(0, colonIndex).trim();
       const afterColon = trimmed.substring(colonIndex + 1).trim();
-      
+
       // Check if after colon starts with list items
       if (afterColon.match(/^-\s+/)) {
         flushList();
@@ -55,10 +55,10 @@ const FormattedMessage = ({ content }) => {
             {beforeColon}
           </h4>
         );
-        
+
         // Extract list items (split by " - ")
         const listItems = afterColon.split(/\s+-\s+/).map(item => item.trim()).filter(Boolean);
-        
+
         if (listItems.length > 0) {
           formattedElements.push(
             <ul key={`list-${lineIndex}`} className="list-disc list-inside space-y-1 sm:space-y-1.5 my-1.5 sm:my-2 ml-2 sm:ml-3">
@@ -73,11 +73,11 @@ const FormattedMessage = ({ content }) => {
     }
 
     // Check if line is a standalone header (ends with colon, not too long, doesn't start with list marker)
-    const isHeader = trimmed.endsWith(':') && 
-                     trimmed.length < 150 && 
-                     !trimmed.startsWith('-') && 
-                     !trimmed.match(/^[-*•]\s/) &&
-                     !trimmed.includes(' - ');
+    const isHeader = trimmed.endsWith(':') &&
+      trimmed.length < 150 &&
+      !trimmed.startsWith('-') &&
+      !trimmed.match(/^[-*•]\s/) &&
+      !trimmed.includes(' - ');
 
     // Check if line is a list item (starts with -, *, •, or number)
     const isListItem = /^[-*•]\s/.test(trimmed) || /^\d+[.)]\s/.test(trimmed);
@@ -121,8 +121,10 @@ const FormattedMessage = ({ content }) => {
   return <div className="space-y-1">{formattedElements}</div>;
 };
 
-const ChatBot = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const ChatBot = ({ isOpen: controlledIsOpen, onOpenChange, onClose }) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = typeof controlledIsOpen === "boolean";
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -131,6 +133,11 @@ const ChatBot = () => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const chatPanelRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const quickReplies = [
     "Show low stock on Myntra",
@@ -139,12 +146,62 @@ const ChatBot = () => {
     "Which sizes are broken?",
   ];
 
+  const setOpenState = useCallback(
+    (nextState) => {
+      const resolvedState = typeof nextState === "function" ? nextState(isOpen) : nextState;
+
+      if (!isControlled) {
+        setInternalIsOpen(resolvedState);
+      }
+
+      if (onOpenChange) {
+        onOpenChange(resolvedState);
+      }
+
+      if (resolvedState === false && onClose) {
+        onClose();
+      }
+    },
+    [isControlled, isOpen, onClose, onOpenChange],
+  );
+
+  const handleClose = useCallback(() => setOpenState(false), [setOpenState]);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Close chatbot on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        chatPanelRef.current &&
+        !chatPanelRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleClose, isOpen]);
+
   const callWebhook = async (userMessage) => {
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
         mode: "cors",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
@@ -175,10 +232,10 @@ const ChatBot = () => {
       }
 
       // Try multiple possible response keys
-      const reply = 
-        data?.reply || 
-        data?.output || 
-        data?.response || 
+      const reply =
+        data?.reply ||
+        data?.output ||
+        data?.response ||
         data?.text ||
         data?.message ||
         data?.answer ||
@@ -193,7 +250,7 @@ const ChatBot = () => {
         console.error("Network error - CORS or connection issue:", error);
         throw new Error("Unable to connect to the chatbot service. Please check your internet connection.");
       }
-      
+
       console.error("Webhook error details:", {
         error: error.message,
         url: WEBHOOK_URL,
@@ -206,7 +263,11 @@ const ChatBot = () => {
   const handleSend = async (messageToSend = null) => {
     const userMessage = (messageToSend || message).trim();
     if (!userMessage || isLoading) return;
-    
+
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+
     // Add user message to chat history
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setMessage("");
@@ -224,7 +285,7 @@ const ChatBot = () => {
 
     try {
       const reply = await callWebhook(userMessage);
-      
+
       // Remove loading message and add actual response
       setMessages((prev) => {
         const withoutLoading = prev.filter((msg) => !msg.isLoading);
@@ -257,7 +318,8 @@ const ChatBot = () => {
     <>
       {/* Chat Toggle Button */}
       <Button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={() => setOpenState((prev) => !prev)}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg hover:scale-110 transition-transform bg-primary z-50"
         size="icon"
       >
@@ -266,7 +328,7 @@ const ChatBot = () => {
 
       {/* Chat Panel */}
       {isOpen && (
-        <Card className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[70vh] shadow-2xl border-2 flex flex-col z-40">
+        <Card ref={chatPanelRef} className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[70vh] shadow-2xl border-2 flex flex-col z-40">
           {/* Header */}
           <div className="p-3 sm:p-4 border-b bg-gradient-to-r from-primary to-accent flex items-center gap-2 flex-shrink-0">
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -288,11 +350,10 @@ const ChatBot = () => {
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border shadow-sm"
-                  }`}
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 ${msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border shadow-sm"
+                    }`}
                 >
                   {msg.isLoading ? (
                     <div className="flex items-center gap-2">
@@ -307,25 +368,28 @@ const ChatBot = () => {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Quick Replies */}
-          <div className="p-2 sm:p-3 border-t bg-card space-y-2 flex-shrink-0">
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {quickReplies.map((reply, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-accent transition-colors text-[10px] sm:text-xs px-2 py-1"
-                  onClick={() => {
-                    handleSend(reply);
-                  }}
-                >
-                  {reply}
-                </Badge>
-              ))}
+          {!hasInteracted && (
+            <div className="p-2 sm:p-3 border-t bg-card space-y-2 flex-shrink-0">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {quickReplies.map((reply, index) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-accent transition-colors text-[10px] sm:text-xs px-2 py-1"
+                    onClick={() => {
+                      handleSend(reply);
+                    }}
+                  >
+                    {reply}
+                  </Badge>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Input */}
           <div className="p-3 sm:p-4 border-t bg-card flex-shrink-0">
@@ -338,9 +402,9 @@ const ChatBot = () => {
                 className="flex-1 text-sm h-9 sm:h-10"
                 disabled={isLoading}
               />
-              <Button 
-                onClick={handleSend} 
-                size="icon" 
+              <Button
+                onClick={() => handleSend()}
+                size="icon"
                 className="bg-primary h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
                 disabled={isLoading || !message.trim()}
               >
