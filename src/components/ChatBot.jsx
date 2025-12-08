@@ -135,6 +135,14 @@ const ChatBot = ({ isOpen: controlledIsOpen, onOpenChange, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  // 👇 NEW: session id per page load
+  const [sessionId] = useState(() => {
+    if (window.crypto?.randomUUID) {
+      return window.crypto.randomUUID();
+    }
+    return "session-" + Math.random().toString(36).slice(2);
+  });
+
   const chatPanelRef = useRef(null);
   const messagesEndRef = useRef(null);
   const buttonRef = useRef(null);
@@ -205,7 +213,10 @@ const ChatBot = ({ isOpen: controlledIsOpen, onOpenChange, onClose }) => {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ 
+          message: userMessage,
+          sessionId: sessionId,       // 👈 send session id with every message 
+        }),
       });
 
       // Get response text first (can only read body once)
