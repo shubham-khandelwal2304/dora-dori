@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const NavigationPanel = () => {
   return (
     <aside className="w-64 flex-shrink-0 border-r bg-card p-6 space-y-4">
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">DD</span>
@@ -15,7 +15,7 @@ const NavigationPanel = () => {
             <p className="text-xs text-muted-foreground">Inventory Intelligence</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <nav className="space-y-2">
         <NavLink
