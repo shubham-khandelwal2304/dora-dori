@@ -23,11 +23,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header onMenuClick={isMobile ? handleToggleNav : undefined} />
-      
+
       <div className="flex min-w-0">
         {/* Desktop sidebar */}
         {!isMobile && <NavigationPanel />}
-        
+
         <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6 max-w-[1920px] mx-auto">
           <KPISection />
 
@@ -35,7 +35,7 @@ const Index = () => {
             <TopPerformersSection />
             <FabricStatusSection />
           </div>
-          
+
           <TrendsSection />
         </main>
       </div>
@@ -47,7 +47,7 @@ const Index = () => {
           onClick={handleCloseNav}
         >
           <div
-            className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-card shadow-xl"
+            className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-card shadow-xl pt-16"
             onClick={(e) => e.stopPropagation()}
           >
             <NavigationPanel />

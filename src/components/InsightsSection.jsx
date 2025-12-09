@@ -11,16 +11,16 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { 
-  AlertTriangle, 
-  TrendingDown, 
-  PackageX, 
-  Layers, 
-  TrendingUp, 
-  DollarSign, 
-  BarChart3, 
-  RotateCcw, 
-  Sparkles, 
+import {
+  AlertTriangle,
+  TrendingDown,
+  PackageX,
+  Layers,
+  TrendingUp,
+  DollarSign,
+  BarChart3,
+  RotateCcw,
+  Sparkles,
   XCircle,
   Lightbulb,
   ChevronRight
@@ -260,7 +260,7 @@ const InsightDetailRow = ({ insight }) => {
           <span className="font-medium ml-2">{insight.style.styleName}</span>
         </div>
       )}
-      
+
       {insight.fabric && (
         <div className="text-sm">
           <span className="text-muted-foreground">Fabric: </span>
@@ -579,7 +579,7 @@ const InsightsSection = () => {
           </Button>
         </div>
       </div>
-      
+
       {isInitialLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, idx) => (
@@ -602,87 +602,86 @@ const InsightsSection = () => {
           ))}
         </div>
       ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(groupedInsights).map(([type, categoryData]) => {
-          const Icon = categoryData.icon;
-          const firstItem = categoryData.items[0];
-          const queryRowsForType = getQueryResultForType(type);
-          const firstRow = queryRowsForType[0];
-          const mappedIndex = aiInsightIndexByType[type];
-          const hasSqlMapping = !!mappedIndex;
-          const stylesCount = hasSqlMapping
-            ? (queryRowsForType && queryRowsForType.length) || 0
-            : categoryData.items.length;
-          
-          const severity = getSeverity(stylesCount);
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(groupedInsights).map(([type, categoryData]) => {
+            const Icon = categoryData.icon;
+            const firstItem = categoryData.items[0];
+            const queryRowsForType = getQueryResultForType(type);
+            const firstRow = queryRowsForType[0];
+            const mappedIndex = aiInsightIndexByType[type];
+            const hasSqlMapping = !!mappedIndex;
+            const stylesCount = hasSqlMapping
+              ? (queryRowsForType && queryRowsForType.length) || 0
+              : categoryData.items.length;
 
-          // Special colors for specific cards:
-          // - "high-potential"    -> red (destructive)
-          // - "new-launch"        -> yellow (warning)
-          const borderLeftColor =
-            type === "high-potential"
-              ? "hsl(var(--destructive))"
-              : type === "new-launch"
-              ? "hsl(var(--warning))"
-              : severity === "high"
-              ? "hsl(var(--destructive))"
-              : severity === "medium"
-              ? "hsl(var(--warning))"
-              : "hsl(var(--muted))";
-          
-          return (
-            <Card 
-              key={type} 
-              className="hover:shadow-lg transition-shadow border-l-4 cursor-pointer"
-              style={{ borderLeftColor }}
-              onClick={() => handleViewMore(type)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-2 flex-1">
+            const severity = getSeverity(stylesCount);
+
+            // Special colors for specific cards:
+            // - "high-potential"    -> red (destructive)
+            // - "new-launch"        -> yellow (warning)
+            const borderLeftColor =
+              type === "high-potential"
+                ? "hsl(var(--destructive))"
+                : type === "new-launch"
+                  ? "hsl(var(--warning))"
+                  : severity === "high"
+                    ? "hsl(var(--destructive))"
+                    : severity === "medium"
+                      ? "hsl(var(--warning))"
+                      : "hsl(var(--muted))";
+
+            return (
+              <Card
+                key={type}
+                className="hover:shadow-lg transition-shadow border-l-4 cursor-pointer"
+                style={{ borderLeftColor }}
+                onClick={() => handleViewMore(type)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2 flex-1">
                       <Icon
-                        className={`h-5 w-5 mt-0.5 ${
-                          severity === "high"
+                        className={`h-5 w-5 mt-0.5 ${severity === "high"
                             ? "text-destructive"
                             : severity === "medium"
-                            ? "text-warning"
-                            : "text-muted-foreground"
-                        }`}
+                              ? "text-warning"
+                              : "text-muted-foreground"
+                          }`}
                       />
-                    <CardTitle className="text-base font-semibold leading-tight">
-                      {categoryData.title}
-                    </CardTitle>
-                  </div>
+                      <CardTitle className="text-base font-semibold leading-tight">
+                        {categoryData.title}
+                      </CardTitle>
+                    </div>
                     <Badge
                       variant={getSeverityVariant(severity)}
                       className="text-xs shrink-0"
                     >
-                    {severity}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl font-bold text-foreground">
+                      {severity}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold text-foreground">
                       {stylesCount}{" "}
                       {type === "fabric-bottleneck"
                         ? stylesCount === 1
                           ? "fabric"
                           : "fabrics"
                         : stylesCount === 1
-                        ? "style"
-                        : "styles"}
+                          ? "style"
+                          : "styles"}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => handleViewMore(type)}
+                    >
+                      View More
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-7"
-                    onClick={() => handleViewMore(type)}
-                  >
-                    View More
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
-                </div>
 
                   {/* Prefer live SQL example if available; if mapped but 0 styles, don't show dummy sample */}
                   {firstRow ? (
@@ -842,58 +841,57 @@ const InsightsSection = () => {
                     </div>
                   ) : (
                     <>
-                {firstItem.style && (
-                  <div className="text-xs text-muted-foreground">
+                      {firstItem.style && (
+                        <div className="text-xs text-muted-foreground">
                           Example:{" "}
                           <span className="font-mono">
                             {firstItem.style.styleId}
                           </span>{" "}
                           - {firstItem.style.styleName}
-                  </div>
-                )}
+                        </div>
+                      )}
 
-                {firstItem.fabric && (
-                  <div className="text-xs text-muted-foreground">
+                      {firstItem.fabric && (
+                        <div className="text-xs text-muted-foreground">
                           Fabric:{" "}
                           <span className="font-medium text-foreground">
                             {firstItem.fabric.type}
                           </span>
-                  </div>
+                        </div>
                       )}
                     </>
-                )}
+                  )}
 
-                <Separator />
+                  <Separator />
 
-                <div className="pt-1">
+                  <div className="pt-1">
                     <div className="text-xs font-semibold text-muted-foreground mb-1">
                       General Recommendation:
                     </div>
-                  <div className="text-xs text-foreground leading-relaxed line-clamp-3">
-                    {firstItem.recommendation}
+                    <div className="text-xs text-foreground leading-relaxed line-clamp-3">
+                      {firstItem.recommendation}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
       {/* Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[85vh]">
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
+            <DialogTitle className="flex items-center gap-2 text-base">
               {selectedCategory && (
                 <>
                   {(() => {
                     const Icon = selectedCategory.icon;
-                    return <Icon className={`h-5 w-5 ${
-                      selectedCategory.priority === "high" ? "text-destructive" : 
-                      selectedCategory.priority === "medium" ? "text-warning" : 
-                      "text-muted-foreground"
-                    }`} />;
+                    return <Icon className={`h-5 w-5 ${selectedCategory.priority === "high" ? "text-destructive" :
+                        selectedCategory.priority === "medium" ? "text-warning" :
+                          "text-muted-foreground"
+                      }`} />;
                   })()}
                   {selectedCategory.title}
                 </>
@@ -906,113 +904,113 @@ const InsightsSection = () => {
                   ? "fabric requires"
                   : "fabrics require"
                 : selectedCount === 1
-                ? "style requires"
-                : "styles require"}{" "}
+                  ? "style requires"
+                  : "styles require"}{" "}
               attention
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)] gap-4">
             {/* Left: SQL results only – if none, show an empty-state message, not sample data */}
-            <ScrollArea className="h-[calc(85vh-170px)] pr-4">
-            <div className="space-y-4">
+            <ScrollArea className="h-[40vh] lg:h-[calc(85vh-170px)] pr-4">
+              <div className="space-y-4">
                 {selectedSqlRows && selectedSqlRows.length > 0 ? (
                   selectedSqlRows.map((row, index) => (
-                      <div
-                        key={index}
-                        className="p-4 border rounded-lg space-y-2 hover:bg-accent/50 transition-colors text-xs"
-                      >
-                        {(row.styleId || row.styleName) && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Style: </span>
-                            {row.styleId && (
-                              <span className="font-mono text-xs">
-                                {row.styleId}
-                              </span>
-                            )}
-                            {row.styleName && (
-                              <span className="font-medium ml-2">
-                                {row.styleName}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                    <div
+                      key={index}
+                      className="p-4 border rounded-lg space-y-2 hover:bg-accent/50 transition-colors text-xs"
+                    >
+                      {(row.styleId || row.styleName) && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Style: </span>
+                          {row.styleId && (
+                            <span className="font-mono text-xs">
+                              {row.styleId}
+                            </span>
+                          )}
+                          {row.styleName && (
+                            <span className="font-medium ml-2">
+                              {row.styleName}
+                            </span>
+                          )}
+                        </div>
+                      )}
 
-                        {row.fabricType || row.fabric_type ? (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Fabric: </span>
-                            <span className="font-medium">
-                              {row.fabricType ?? row.fabric_type}
+                      {row.fabricType || row.fabric_type ? (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Fabric: </span>
+                          <span className="font-medium">
+                            {row.fabricType ?? row.fabric_type}
+                          </span>
+                        </div>
+                      ) : null}
+
+                      <div className="space-y-1.5">
+                        {row.dailyTotalSales !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Daily sales:
+                            </span>
+                            <span className="font-semibold">
+                              {row.dailyTotalSales} units/day
                             </span>
                           </div>
-                        ) : null}
-
-                        <div className="space-y-1.5">
-                          {row.dailyTotalSales !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Daily sales:
-                              </span>
-                              <span className="font-semibold">
-                                {row.dailyTotalSales} units/day
-                              </span>
-                            </div>
-                          )}
-                          {row.totalDaysOfCover !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Days of cover:
-                              </span>
-                              <span className="font-semibold">
-                                {row.totalDaysOfCover} days
-                              </span>
-                            </div>
-                          )}
-                          {row.atsPooled !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                ATS pooled:
-                              </span>
-                              <span className="font-semibold">
-                                {row.atsPooled} units
-                              </span>
-                            </div>
-                          )}
-                          {row.totalSellThrough !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Sell-through:
-                              </span>
-                              <span className="font-semibold">
-                                {Math.round(row.totalSellThrough * 100)}%
-                              </span>
-                            </div>
-                          )}
-                          {row.returnAveragePercent !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Return rate:
-                              </span>
-                              <span className="font-semibold">
-                                {row.returnAveragePercent}%
-                              </span>
-                            </div>
-                          )}
-                          {selectedCategory?.type !== "high-potential" && row.roas !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                ROAS:
-                              </span>
-                              <span className="font-semibold">
-                                {row.roas}x
-                              </span>
-                            </div>
-                          )}
-                          {(() => {
-                            const fabricRemaining =
-                              row.totalFabricRemainingMeters ??
-                              row.total_fabric_remaining_meters;
-                            return fabricRemaining !== undefined ? (
+                        )}
+                        {row.totalDaysOfCover !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Days of cover:
+                            </span>
+                            <span className="font-semibold">
+                              {row.totalDaysOfCover} days
+                            </span>
+                          </div>
+                        )}
+                        {row.atsPooled !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              ATS pooled:
+                            </span>
+                            <span className="font-semibold">
+                              {row.atsPooled} units
+                            </span>
+                          </div>
+                        )}
+                        {row.totalSellThrough !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Sell-through:
+                            </span>
+                            <span className="font-semibold">
+                              {Math.round(row.totalSellThrough * 100)}%
+                            </span>
+                          </div>
+                        )}
+                        {row.returnAveragePercent !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Return rate:
+                            </span>
+                            <span className="font-semibold">
+                              {row.returnAveragePercent}%
+                            </span>
+                          </div>
+                        )}
+                        {selectedCategory?.type !== "high-potential" && row.roas !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              ROAS:
+                            </span>
+                            <span className="font-semibold">
+                              {row.roas}x
+                            </span>
+                          </div>
+                        )}
+                        {(() => {
+                          const fabricRemaining =
+                            row.totalFabricRemainingMeters ??
+                            row.total_fabric_remaining_meters;
+                          return fabricRemaining !== undefined ? (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">
                                 Fabric remaining:
@@ -1021,98 +1019,98 @@ const InsightsSection = () => {
                                 {fabricRemaining} m
                               </span>
                             </div>
-                            ) : null;
-                          })()}
-                          {row.estDaysOfCover !== undefined && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Est. days of cover:
-                              </span>
-                              <span className="font-semibold">
-                                {row.estDaysOfCover} days
-                              </span>
-                            </div>
-                          )}
-                          {(() => {
-                            const sizeMeta = [
-                              { label: "S", sizeKey: "sizeSBroken", sizeKeySnake: "size_s_broken", mKey: "myntraBrokenS", mKeySnake: "myntra_broken_s", mKeyCamel: "myntraSizeSBroken", nKey: "nykaaBrokenS", nKeySnake: "nykaa_broken_s", nKeyCamel: "nykaaSizeSBroken" },
-                              { label: "M", sizeKey: "sizeMBroken", sizeKeySnake: "size_m_broken", mKey: "myntraBrokenM", mKeySnake: "myntra_broken_m", mKeyCamel: "myntraSizeMBroken", nKey: "nykaaBrokenM", nKeySnake: "nykaa_broken_m", nKeyCamel: "nykaaSizeMBroken" },
-                              { label: "L", sizeKey: "sizeLBroken", sizeKeySnake: "size_l_broken", mKey: "myntraBrokenL", mKeySnake: "myntra_broken_l", mKeyCamel: "myntraSizeLBroken", nKey: "nykaaBrokenL", nKeySnake: "nykaa_broken_l", nKeyCamel: "nykaaSizeLBroken" },
-                              { label: "XL", sizeKey: "sizeXlBroken", sizeKeySnake: "size_xl_broken", mKey: "myntraBrokenXl", mKeySnake: "myntra_broken_xl", mKeyCamel: "myntraSizeXlBroken", nKey: "nykaaBrokenXl", nKeySnake: "nykaa_broken_xl", nKeyCamel: "nykaaSizeXlBroken" },
-                            ];
+                          ) : null;
+                        })()}
+                        {row.estDaysOfCover !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Est. days of cover:
+                            </span>
+                            <span className="font-semibold">
+                              {row.estDaysOfCover} days
+                            </span>
+                          </div>
+                        )}
+                        {(() => {
+                          const sizeMeta = [
+                            { label: "S", sizeKey: "sizeSBroken", sizeKeySnake: "size_s_broken", mKey: "myntraBrokenS", mKeySnake: "myntra_broken_s", mKeyCamel: "myntraSizeSBroken", nKey: "nykaaBrokenS", nKeySnake: "nykaa_broken_s", nKeyCamel: "nykaaSizeSBroken" },
+                            { label: "M", sizeKey: "sizeMBroken", sizeKeySnake: "size_m_broken", mKey: "myntraBrokenM", mKeySnake: "myntra_broken_m", mKeyCamel: "myntraSizeMBroken", nKey: "nykaaBrokenM", nKeySnake: "nykaa_broken_m", nKeyCamel: "nykaaSizeMBroken" },
+                            { label: "L", sizeKey: "sizeLBroken", sizeKeySnake: "size_l_broken", mKey: "myntraBrokenL", mKeySnake: "myntra_broken_l", mKeyCamel: "myntraSizeLBroken", nKey: "nykaaBrokenL", nKeySnake: "nykaa_broken_l", nKeyCamel: "nykaaSizeLBroken" },
+                            { label: "XL", sizeKey: "sizeXlBroken", sizeKeySnake: "size_xl_broken", mKey: "myntraBrokenXl", mKeySnake: "myntra_broken_xl", mKeyCamel: "myntraSizeXlBroken", nKey: "nykaaBrokenXl", nKeySnake: "nykaa_broken_xl", nKeyCamel: "nykaaSizeXlBroken" },
+                          ];
 
-                            const truthy = (val) =>
-                              val === true ||
-                              val === "true" ||
-                              val === "t" ||
-                              val === "1" ||
-                              val === 1;
+                          const truthy = (val) =>
+                            val === true ||
+                            val === "true" ||
+                            val === "t" ||
+                            val === "1" ||
+                            val === 1;
 
-                            const brokenSizes = sizeMeta
-                              .map((size) => {
-                                const sizeBroken =
-                                  truthy(row[size.sizeKey]) ||
-                                  truthy(row[size.sizeKeySnake]) ||
-                                  truthy(row[size.mKeyCamel]) ||
-                                  truthy(row[size.mKey]) ||
-                                  truthy(row[size.mKeySnake]) ||
-                                  truthy(row[size.nKeyCamel]) ||
-                                  truthy(row[size.nKey]) ||
-                                  truthy(row[size.nKeySnake]);
+                          const brokenSizes = sizeMeta
+                            .map((size) => {
+                              const sizeBroken =
+                                truthy(row[size.sizeKey]) ||
+                                truthy(row[size.sizeKeySnake]) ||
+                                truthy(row[size.mKeyCamel]) ||
+                                truthy(row[size.mKey]) ||
+                                truthy(row[size.mKeySnake]) ||
+                                truthy(row[size.nKeyCamel]) ||
+                                truthy(row[size.nKey]) ||
+                                truthy(row[size.nKeySnake]);
 
-                                if (!sizeBroken) return null;
+                              if (!sizeBroken) return null;
 
-                                const platforms = [];
-                                if (truthy(row[size.mKeyCamel] ?? row[size.mKey] ?? row[size.mKeySnake])) {
-                                  platforms.push("Myntra");
-                                }
-                                if (truthy(row[size.nKeyCamel] ?? row[size.nKey] ?? row[size.nKeySnake])) {
-                                  platforms.push("Nykaa");
-                                }
+                              const platforms = [];
+                              if (truthy(row[size.mKeyCamel] ?? row[size.mKey] ?? row[size.mKeySnake])) {
+                                platforms.push("Myntra");
+                              }
+                              if (truthy(row[size.nKeyCamel] ?? row[size.nKey] ?? row[size.nKeySnake])) {
+                                platforms.push("Nykaa");
+                              }
 
-                                if (!platforms.length) return null;
+                              if (!platforms.length) return null;
 
-                                return { label: size.label, platforms };
-                              })
-                              .filter(Boolean);
+                              return { label: size.label, platforms };
+                            })
+                            .filter(Boolean);
 
-                            if (!brokenSizes.length) return null;
+                          if (!brokenSizes.length) return null;
 
-                            return (
-                              <div className="pt-2 border-t space-y-1.5">
-                                <div className="text-muted-foreground">
-                                  Broken sizes (raw):
-                                </div>
-                                {brokenSizes.map((size) => (
-                                  <div
-                                    key={size.label}
-                                    className="text-[11px]"
-                                  >
-                                    <span className="font-semibold text-foreground">
-                                      Size {size.label}
-                                    </span>{" "}
-                                    <span className="text-destructive">
-                                      Broken on {size.platforms.join(", ")}
-                                    </span>
-                                  </div>
-                                ))}
+                          return (
+                            <div className="pt-2 border-t space-y-1.5">
+                              <div className="text-muted-foreground">
+                                Broken sizes (raw):
                               </div>
-                            );
-                          })()}
-                        </div>
+                              {brokenSizes.map((size) => (
+                                <div
+                                  key={size.label}
+                                  className="text-[11px]"
+                                >
+                                  <span className="font-semibold text-foreground">
+                                    Size {size.label}
+                                  </span>{" "}
+                                  <span className="text-destructive">
+                                    Broken on {size.platforms.join(", ")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
-                    ))
+                    </div>
+                  ))
                 ) : (
                   <div className="p-4 border rounded-lg text-xs text-muted-foreground bg-muted/30">
                     No styles are currently flagged from the latest data for this
                     insight category.
                   </div>
                 )}
-            </div>
-          </ScrollArea>
+              </div>
+            </ScrollArea>
 
             {/* Right: AI insight panel */}
-            <div className="border rounded-lg p-4 bg-muted/40 flex flex-col gap-3 h-[calc(85vh-170px)]">
+            <div className="border rounded-lg p-4 bg-muted/40 flex flex-col gap-3 h-auto lg:h-[calc(85vh-170px)]">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
                   AI Inventory Summary

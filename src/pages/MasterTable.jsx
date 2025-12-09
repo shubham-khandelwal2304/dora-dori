@@ -20,11 +20,11 @@ const MasterTable = () => {
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <Header onMenuClick={isMobile ? handleToggleNav : undefined} />
-      
+
       <div className="flex flex-1 min-h-0 min-w-0">
         {/* Desktop sidebar */}
         {!isMobile && <NavigationPanel />}
-        
+
         <main className="flex-1 min-w-0 overflow-hidden">
           <MasterTableSection />
         </main>
@@ -37,7 +37,7 @@ const MasterTable = () => {
           onClick={handleCloseNav}
         >
           <div
-            className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-card shadow-xl"
+            className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-card shadow-xl pt-16"
             onClick={(e) => e.stopPropagation()}
           >
             <NavigationPanel />
