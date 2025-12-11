@@ -49,6 +49,11 @@ export default async function handler(req, res) {
             styleId = req.body.style_id;
         }
 
+        // 🧹 SANITIZATION: Remove any query params that Vercel might have attached (e.g. ?path=...)
+        if (styleId && styleId.includes('?')) {
+          styleId = styleId.split('?')[0];
+        }
+
         if (styleId) styleId = styleId.trim();
         
         const updates = req.body || {};
