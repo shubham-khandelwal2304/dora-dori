@@ -98,7 +98,9 @@ const MasterTableSection = () => {
       }
 
       const json = await res.json();
-      const rows = (json && Array.isArray(json.data)) ? json.data : [];
+      const rows = (json && Array.isArray(json.data))
+        ? json.data.filter(r => r && typeof r === 'object')
+        : [];
       setData(rows);
       setPagination({
         total: rows.length,
@@ -318,6 +320,7 @@ const MasterTableSection = () => {
                   </TableRow>
                 ) : (
                   data.map((row, index) => {
+                    if (!row) return null;
                     const isEditing = editingRowId === row.style_id;
                     const rowKey = row.style_id || index;
 
