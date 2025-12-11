@@ -9,7 +9,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_data';
+const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_table';
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -36,9 +36,21 @@ export default async function handler(req, res) {
     // Master Table endpoint
     if (path === '/master-table' || path.startsWith('/master-table/')) {
       // Check for PUT /master-table/:styleId
+      // Vercel/Next serverless might pass query params automatically, or we parse path
       const idMatch = path.match(/^\/master-table\/([^\/]+)$/);
-      if (idMatch && req.method === 'PUT') {
-        const styleId = decodeURIComponent(idMatch[1]).trim();
+      
+      if ((idMatch || req.query.styleId) && req.method === 'PUT') {
+        let styleId = req.query.styleId;
+        if (!styleId && idMatch) {
+            styleId = decodeURIComponent(idMatch[1]);
+        }
+        // Fallback to body if URL extraction failed but body has it
+        if (!styleId && req.body && req.body.style_id) {
+            styleId = req.body.style_id;
+        }
+
+        if (styleId) styleId = styleId.trim();
+        
         const updates = req.body || {};
 
         // ✅ Primary editable columns
@@ -97,7 +109,7 @@ export default async function handler(req, res) {
         const query = `
           UPDATE ${tableName}
           SET ${setParts.join(', ')}
-          WHERE TRIM(style_id) = TRIM($${index})
+          WHERE LOWER(TRIM(style_id)) = LOWER(TRIM($${index}))
           RETURNING *;
         `;
 
@@ -109,7 +121,8 @@ export default async function handler(req, res) {
               debug: { 
                 receivedStyleId: styleId, 
                 tableName: tableName,
-                message: "Update query returned 0 modified rows. Check if ID matches exactly." 
+                message: "Update query returned 0 modified rows. Check if ID matches exactly.",
+                query: query.trim()
               } 
             });
           }
