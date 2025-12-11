@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       // Check for PUT /master-table/:styleId
       const idMatch = path.match(/^\/master-table\/([^\/]+)$/);
       if (idMatch && req.method === 'PUT') {
-        const styleId = decodeURIComponent(idMatch[1]);
+        const styleId = decodeURIComponent(idMatch[1]).trim();
         const updates = req.body || {};
 
         // ✅ Primary editable columns
@@ -93,17 +93,25 @@ export default async function handler(req, res) {
         }
 
         values.push(styleId);
+        // Use TRIM to ensure whitespace doesn't prevent matching
         const query = `
           UPDATE ${tableName}
           SET ${setParts.join(', ')}
-          WHERE style_id = $${index}
+          WHERE TRIM(style_id) = TRIM($${index})
           RETURNING *;
         `;
 
         try {
           const result = await pool.query(query, values);
           if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Style not found' });
+            return res.status(404).json({ 
+              error: 'Style not found', 
+              debug: { 
+                receivedStyleId: styleId, 
+                tableName: tableName,
+                message: "Update query returned 0 modified rows. Check if ID matches exactly." 
+              } 
+            });
           }
           return res.json({ row: result.rows[0] });
         } catch (err) {
