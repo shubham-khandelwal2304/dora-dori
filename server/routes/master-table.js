@@ -61,5 +61,156 @@ router.get('/master-table', async (req, res) => {
   }
 });
 
-export default router;
+// PUT /api/master-table/:styleId
+router.put('/master-table/:styleId', async (req, res) => {
+  const { styleId } = req.params;
+  const updates = req.body || {};
 
+  if (!styleId) {
+    return res.status(400).json({ error: 'style_id is required in URL' });
+  }
+
+  // ✅ Primary editable columns (except style_id)
+  const editableColumns = [
+    'style_name',
+    'category',
+    'launch_date',
+    'color',
+    'fabric_type',
+    'fabric_type_2',
+    'fabric_type_3',
+    'fabric_available_mtr',
+    'fabric_available_mtr_2',
+    'fabric_available_mtr_3',
+    'fabric_yield_per_unit',
+    'fabric_yield_per_unit_1',
+    'fabric_yield_per_unit_2',
+    'fabric_yield_per_unit_3',
+    'listed_myntra',
+    'listed_nykaa',
+    'listed_quantity',
+    'ats_pooled',
+    'ats_myntra',
+    'ats_nykaa',
+    'one_month_total_sales',
+    'one_month_sales_myntra',
+    'one_month_sales_nykaa',
+    'mrp',
+    'price_myntra',
+    'price_nykaa',
+    'discount_percent_myntra',
+    'discount_percent_nykaa',
+    'total_return_units',
+    'return_units_myntra',
+    'return_units_nykaa',
+    'return_average_percent',
+    'completed_qty',
+    'size_list_myntra',
+    'size_list_nykaa',
+    'myntra_qty_s',
+    'myntra_qty_m',
+    'myntra_qty_l',
+    'myntra_qty_xl',
+    'nykaa_qty_s',
+    'nykaa_qty_m',
+    'nykaa_qty_l',
+    'nykaa_qty_xl',
+    'myntra_sold_s',
+    'myntra_sold_m',
+    'myntra_sold_l',
+    'myntra_sold_xl',
+    'nykaa_sold_s',
+    'nykaa_sold_m',
+    'nykaa_sold_l',
+    'nykaa_sold_xl',
+    'ads_platform',
+    'clicks',
+    'impressions',
+    'ad_spend',
+    'total_orders_sold_myntra',
+    'total_orders_sold_nykaa',
+  ];
+
+  // ❌ Derived columns (never update from API)
+  const derivedColumns = new Set([
+    'style_id',
+    'daily_sales_myntra',
+    'daily_sales_nykaa',
+    'daily_total_sales',
+    'days_of_cover_myntra',
+    'days_of_cover_nykaa',
+    'total_days_of_cover',
+    'sell_through_myntra',
+    'sell_through_nykaa',
+    'total_sell_through',
+    'broken_size_myntra',
+    'broken_size_nykaa',
+    'fabric_consumed_meters',
+    'fabric_consumed_meters_1',
+    'fabric_consumed_meters_2',
+    'fabric_consumed_meters_3',
+    'fabric_remaining_meters_1',
+    'fabric_remaining_meters_2',
+    'fabric_remaining_meters_3',
+    'units_possible_from_fabric',
+    'revenue_myntra',
+    'revenue_nykaa',
+    'total_revenue',
+    'roas',
+    'contribution_margin_overall',
+    'contribution_margin_myntra',
+    'contribution_margin_nykaa',
+    'size_contribution_myntra_s',
+    'size_contribution_myntra_m',
+    'size_contribution_myntra_l',
+    'size_contribution_myntra_xl',
+    'size_contribution_nykaa_s',
+    'size_contribution_nykaa_m',
+    'size_contribution_nykaa_l',
+  ]);
+
+  // Build SET clause only with allowed fields
+  const setParts = [];
+  const values = [];
+  let index = 1;
+
+  for (const col of editableColumns) {
+    if (updates[col] !== undefined && !derivedColumns.has(col)) {
+      setParts.push(`${col} = $${index}`);
+      values.push(updates[col]);
+      index++;
+    }
+  }
+
+  if (setParts.length === 0) {
+    return res.status(400).json({ error: 'No valid editable fields provided' });
+  }
+
+  // style_id goes last in WHERE
+  values.push(styleId);
+
+  // Use environment variable for table name
+  const tableName = process.env.MASTER_TABLE_NAME || 'inventory_data';
+
+  const query = `
+    UPDATE ${tableName}
+    SET ${setParts.join(', ')}
+    WHERE style_id = $${index}
+    RETURNING *;
+  `;
+
+  try {
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Style not found' });
+    }
+
+    return res.json({ row: result.rows[0] });
+  } catch (err) {
+    console.error('Error updating style', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;

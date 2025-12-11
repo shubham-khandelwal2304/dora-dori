@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,8 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Database, Loader2, RotateCcw } from "lucide-react";
+import { Database, Loader2, RotateCcw, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const MASTER_TABLE_CACHE_KEY = "dora_dori_master_table_cache_v1";
 
@@ -70,13 +72,20 @@ const MasterTableSection = () => {
   const [pagination, setPagination] = useState({
     total: 0,
   });
+  const { toast } = useToast();
+
+  // Editing state
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [draftRow, setDraftRow] = useState(null);
 
   const columns = data.length ? Object.keys(data[0]) : [];
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+    setEditingRowId(null);
+    setDraftRow(null);
+
     try {
       const controller = new AbortController();
 
@@ -121,34 +130,116 @@ const MasterTableSection = () => {
   }, []);
 
   useEffect(() => {
-    // On first mount, try to hydrate from cache; if none, fetch once.
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        const cached = window.localStorage.getItem(MASTER_TABLE_CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && Array.isArray(parsed.data)) {
-            setData(parsed.data);
-            if (parsed.pagination && typeof parsed.pagination.total === "number") {
-              setPagination(parsed.pagination);
-            } else {
-              setPagination({ total: parsed.data.length });
-            }
-            return; // use cached state; don't auto-refresh
-          }
-        }
-      }
-    } catch (e) {
-      console.error("Failed to read cached master table:", e);
-    }
-
+    // Always fetch fresh data on mount (ignore cache to ensure latest state)
     fetchData();
   }, [fetchData]);
+
+  const handleEditClick = (row) => {
+    // Only one row edit at a time
+    if (editingRowId !== null) return;
+    setEditingRowId(row.style_id);
+    setDraftRow({ ...row });
+  };
+
+  const handleCancelClick = () => {
+    setEditingRowId(null);
+    setDraftRow(null);
+  };
+
+  const handleSaveClick = async () => {
+    if (!editingRowId || !draftRow) return;
+
+    try {
+      // Create payload excluding style_id
+      const payload = { ...draftRow };
+      delete payload.style_id;
+
+      const res = await fetch(`/api/master-table/${editingRowId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Update failed');
+      }
+
+      const responseData = await res.json();
+      const updatedRow = responseData.row;
+
+      // Update local state
+      const newData = data.map((r) =>
+        r.style_id === editingRowId ? updatedRow : r
+      );
+      setData(newData);
+
+      toast({
+        title: "Saved",
+        description: `Style ${editingRowId} updated successfully.`,
+      });
+
+      setEditingRowId(null);
+      setDraftRow(null);
+    } catch (err) {
+      console.error("Error saving row:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Could not save changes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /* New Validation: Read-only columns list */
+  const readOnlyColumns = new Set([
+    'style_id',
+    'daily_sales_myntra',
+    'daily_sales_nykaa',
+    'daily_total_sales',
+    'days_of_cover_myntra',
+    'days_of_cover_nykaa',
+    'total_days_of_cover',
+    'sell_through_myntra',
+    'sell_through_nykaa',
+    'total_sell_through',
+    'broken_size_myntra',
+    'broken_size_nykaa',
+    'fabric_consumed_meters',
+    'fabric_consumed_meters_1',
+    'fabric_consumed_meters_2',
+    'fabric_consumed_meters_3',
+    'fabric_remaining_meters_1',
+    'fabric_remaining_meters_2',
+    'fabric_remaining_meters_3',
+    'units_possible_from_fabric',
+    'revenue_myntra',
+    'revenue_nykaa',
+    'total_revenue',
+    'roas',
+    'contribution_margin_overall',
+    'contribution_margin_myntra',
+    'contribution_margin_nykaa',
+    'size_contribution_myntra_s',
+    'size_contribution_myntra_m',
+    'size_contribution_myntra_l',
+    'size_contribution_myntra_xl',
+    'size_contribution_nykaa_s',
+    'size_contribution_nykaa_m',
+    'size_contribution_nykaa_l',
+  ]);
+
+  const handleInputChange = (col, value) => {
+    setDraftRow((prev) => ({
+      ...prev,
+      [col]: value,
+    }));
+  };
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: scrollbarStyles }} />
-      
+
       <section className="flex flex-col h-full">
         {/* Header outside card - matches Insights page layout */}
         <div className="flex items-center justify-between mb-4 px-4 sm:px-6 pt-4 sm:pt-6 flex-wrap gap-3">
@@ -168,41 +259,22 @@ const MasterTableSection = () => {
             <span className="inline xs:hidden">Sync</span>
           </Button>
         </div>
-        
+
         {/* Card contains only the table */}
         <Card className="flex flex-col flex-1 min-h-0 mx-4 sm:mx-6 mb-4 sm:mb-6">
           <CardContent className="flex-1 min-h-0 flex flex-col p-3 sm:p-4 md:p-6">
-          {/* 
-            SINGLE SCROLL CONTAINER - The Fix!
-            
-            PREVIOUS ISSUE:
-            - Had max-h-[70vh] but parent containers weren't height-constrained
-            - Scrollbar was pushed out of viewport by page growth
-            - User had to scroll page to see the horizontal scrollbar
-            
-            NEW SOLUTION:
-            - flex-1: Grows to fill all available CardContent height
-            - min-h-0: Critical for nested flex scrolling (prevents content from forcing growth)
-            - overflow-x: auto: Shows horizontal scrollbar when table width exceeds container
-            - overflow-y: auto: Shows vertical scrollbar when content height exceeds container
-            - This is the ONLY scrollable container - no nested scroll areas
-            - Constrained by viewport-bound parent, so scrollbar is always visible
-          */}
-          <div 
-            className="master-table-scroll-container flex-1 min-h-0 rounded-md border" 
-            style={{ 
-              overflowX: 'auto', 
-              overflowY: 'auto'
-            }}
-          >
-            {/* 
-              TABLE: Wide enough to trigger horizontal scrolling
-              - min-w-[1200px] ensures table is wider than typical viewports
-              - Table itself does NOT scroll; parent container handles it
-            */}
-            <Table className="min-w-full w-full">
-              <TableHeader className="sticky top-0 bg-muted/50 z-10">
+            <Table
+              className="min-w-full w-full"
+              wrapperClassName="master-table-scroll-container flex-1 min-h-0 rounded-md border"
+            >
+              <TableHeader className="sticky top-0 bg-background z-20">
                 <TableRow className="border-b-2">
+                  {/* Actions Column Header - Moved to Start */}
+                  {columns.length > 0 && (
+                    <TableHead className="py-2 sm:py-3 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs font-semibold whitespace-nowrap text-left sticky left-0 bg-background z-30 shadow-[5px_0px_5px_-5px_rgba(0,0,0,0.1)]">
+                      Actions
+                    </TableHead>
+                  )}
                   {columns.map((col) => (
                     <TableHead
                       key={col}
@@ -217,7 +289,7 @@ const MasterTableSection = () => {
                 {loading ? (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length || 1}
+                      colSpan={columns.length + 1}
                       className="text-center text-muted-foreground py-8"
                     >
                       <div className="flex items-center justify-center gap-2">
@@ -229,7 +301,7 @@ const MasterTableSection = () => {
                 ) : error ? (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length || 1}
+                      colSpan={columns.length + 1}
                       className="text-center text-destructive py-8"
                     >
                       Error: {error}
@@ -238,41 +310,92 @@ const MasterTableSection = () => {
                 ) : data.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length || 1}
+                      colSpan={columns.length + 1}
                       className="text-center text-muted-foreground py-8"
                     >
                       No styles found matching your search
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data.map((row, index) => (
-                    <TableRow key={index} className="hover:bg-muted/30 transition-colors">
-                      {columns.map((col) => (
-                        <TableCell key={col} className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs whitespace-nowrap">
-                          {row[col] !== null && row[col] !== undefined
-                            ? String(row[col])
-                            : ""}
+                  data.map((row, index) => {
+                    const isEditing = editingRowId === row.style_id;
+                    const rowKey = row.style_id || index;
+
+                    return (
+                      <TableRow key={rowKey} className={`hover:bg-muted/30 transition-colors ${isEditing ? 'bg-muted/20' : ''}`}>
+                        {/* Actions Column - Moved to Start */}
+                        <TableCell className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left sticky left-0 bg-background z-10 shadow-[5px_0px_5px_-5px_rgba(0,0,0,0.1)]">
+                          <div className="flex justify-start gap-2">
+                            {isEditing ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                  onClick={handleCancelClick}
+                                  title="Cancel"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-100"
+                                  onClick={handleSaveClick}
+                                  title="Save"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                onClick={() => handleEditClick(row)}
+                                disabled={editingRowId !== null}
+                                title="Edit"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                        {columns.map((col) => {
+                          const isReadOnly = readOnlyColumns.has(col) || col === 'style_id';
+                          return (
+                            <TableCell key={col} className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs whitespace-nowrap">
+                              {isEditing && !isReadOnly ? (
+                                <Input
+                                  className="h-7 w-full min-w-[100px] text-xs"
+                                  value={draftRow[col] !== null && draftRow[col] !== undefined ? draftRow[col] : ""}
+                                  onChange={(e) => handleInputChange(col, e.target.value)}
+                                />
+                              ) : (
+                                row[col] !== null && row[col] !== undefined ? String(row[col]) : ""
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
-          </div>
-          
-          {/* Footer - fixed at bottom, doesn't scroll */}
-          <div className="mt-3 sm:mt-4 flex items-center justify-between flex-shrink-0 px-1">
-            <div className="text-[10px] sm:text-xs text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{pagination.total}</span> styles
+
+
+            {/* Footer - fixed at bottom, doesn't scroll */}
+            <div className="mt-3 sm:mt-4 flex items-center justify-between flex-shrink-0 px-1">
+              <div className="text-[10px] sm:text-xs text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{pagination.total}</span> styles
+              </div>
             </div>
-          </div>
           </CardContent>
         </Card>
-      </section>
+      </section >
     </>
   );
 };
 
 export default MasterTableSection;
-
