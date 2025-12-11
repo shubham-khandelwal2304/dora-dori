@@ -9,7 +9,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_table';
+const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_data';
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -116,13 +116,25 @@ export default async function handler(req, res) {
         try {
           const result = await pool.query(query, values);
           if (result.rows.length === 0) {
+            // DIAGNOSTIC STEP: Check what IDs actually exist
+            let availableIds = [];
+            try {
+              const checkQuery = `SELECT style_id FROM ${tableName} LIMIT 5`;
+              const checkResult = await pool.query(checkQuery);
+              availableIds = checkResult.rows.map(r => r.style_id);
+            } catch (e) {
+              console.error('Diagnostic query failed:', e);
+            }
+
             return res.status(404).json({ 
               error: 'Style not found', 
               debug: { 
                 receivedStyleId: styleId, 
                 tableName: tableName,
-                message: "Update query returned 0 modified rows. Check if ID matches exactly.",
-                query: query.trim()
+                envMasterTableName: process.env.MASTER_TABLE_NAME || '(not set)',
+                message: "Update returned 0 rows. See available_ids to verify table content.",
+                query: query.trim(),
+                available_ids_sample: availableIds
               } 
             });
           }
