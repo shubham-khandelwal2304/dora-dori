@@ -78,7 +78,7 @@ const MasterTableSection = () => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [draftRow, setDraftRow] = useState(null);
 
-  const columns = data.length ? Object.keys(data[0]) : [];
+  const columns = (data && data.length > 0 && data[0]) ? Object.keys(data[0]) : [];
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -98,7 +98,7 @@ const MasterTableSection = () => {
       }
 
       const json = await res.json();
-      const rows = json.data || [];
+      const rows = (json && Array.isArray(json.data)) ? json.data : [];
       setData(rows);
       setPagination({
         total: rows.length,
