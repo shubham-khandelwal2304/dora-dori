@@ -3,7 +3,7 @@ import pool from '../lib/db.js';
 
 const router = express.Router();
 
-const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_data';
+const getTableName = () => process.env.MASTER_VIEW_NAME || process.env.MASTER_TABLE_NAME || 'inventory_data';
 
 // 1–4) KPIs – aggregated in a single query
 router.get('/kpis', async (req, res) => {

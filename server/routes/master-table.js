@@ -3,6 +3,9 @@ import pool from '../lib/db.js';
 
 const router = express.Router();
 
+const tableName = process.env.MASTER_TABLE_NAME || 'inventory_data';
+const viewName = process.env.MASTER_VIEW_NAME || tableName;
+
 // GET /api/master-table
 // Returns ALL matching rows (no pagination) so the frontend can show
 // the full dataset on a single page.
@@ -23,13 +26,10 @@ router.get('/master-table', async (req, res) => {
       queryParams.push(`%${search.trim()}%`);
     }
 
-    // Table/view name - use environment variable or default
-    const tableName = process.env.MASTER_TABLE_NAME || 'inventory_data';
-
     // Main query - return ALL columns and ALL matching rows
     const dataQuery = `
       SELECT *
-      FROM ${tableName}
+      FROM ${viewName}
       ${whereClause}
       ORDER BY style_id ASC
     `;
@@ -54,7 +54,7 @@ router.get('/master-table', async (req, res) => {
       detail: error.detail,
       hint: error.hint,
     });
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch master table',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
@@ -189,27 +189,31 @@ router.put('/master-table/:styleId', async (req, res) => {
   // style_id goes last in WHERE
   values.push(styleId);
 
-  // Use environment variable for table name
-  const tableName = process.env.MASTER_TABLE_NAME || 'inventory_data';
-
-  const query = `
+  // 1. UPDATE the TABLE
+  const updateQuery = `
     UPDATE ${tableName}
     SET ${setParts.join(', ')}
     WHERE style_id = $${index}
-    RETURNING *;
+    RETURNING style_id;
   `;
 
   try {
-    const result = await pool.query(query, values);
+    const result = await pool.query(updateQuery, values);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Style not found' });
     }
 
-    return res.json({ row: result.rows[0] });
+    // 2. FETCH result from the VIEW
+    const viewQuery = `SELECT * FROM ${viewName} WHERE style_id = $1`;
+    const viewResult = await pool.query(viewQuery, [styleId]);
+
+    // Return the calculated row from the view
+    return res.json({ row: viewResult.rows[0] });
+
   } catch (err) {
-    console.error('Error updating style', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error updating style:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
 
