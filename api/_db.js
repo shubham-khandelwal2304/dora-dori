@@ -14,7 +14,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-export const getTableName = () => process.env.MASTER_TABLE_NAME || 'inventory_data';
+export const getTableName = () => process.env.MASTER_VIEW_NAME || 'inventory_data';
 
 export default pool;
 
