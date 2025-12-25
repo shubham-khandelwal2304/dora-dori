@@ -271,12 +271,12 @@ const MasterTableSection = () => {
             >
               <TableHeader className="sticky top-0 bg-background z-20">
                 <TableRow className="border-b-2">
-                  {/* Actions Column Header - Moved to Start */}
+                  {/* Actions Column Header - Moved to Start
                   {columns.length > 0 && (
                     <TableHead className="py-2 sm:py-3 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs font-semibold whitespace-nowrap text-left sticky left-0 bg-background z-30 shadow-[5px_0px_5px_-5px_rgba(0,0,0,0.1)]">
                       Actions
                     </TableHead>
-                  )}
+                  )} */}
                   {columns.map((col) => (
                     <TableHead
                       key={col}
@@ -326,7 +326,7 @@ const MasterTableSection = () => {
 
                     return (
                       <TableRow key={rowKey} className={`hover:bg-muted/30 transition-colors ${isEditing ? 'bg-muted/20' : ''}`}>
-                        {/* Actions Column - Moved to Start */}
+                        {/* Actions Column - Moved to Start 
                         <TableCell className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-left sticky left-0 bg-background z-10 shadow-[5px_0px_5px_-5px_rgba(0,0,0,0.1)]">
                           <div className="flex justify-start gap-2">
                             {isEditing ? (
@@ -363,7 +363,7 @@ const MasterTableSection = () => {
                               </Button>
                             )}
                           </div>
-                        </TableCell>
+                        </TableCell> */}
                         {columns.map((col) => {
                           const isReadOnly = readOnlyColumns.has(col) || col === 'style_id';
                           return (

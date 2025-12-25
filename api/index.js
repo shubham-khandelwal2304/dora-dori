@@ -39,6 +39,7 @@ export default async function handler(req, res) {
       // Vercel/Next serverless might pass query params automatically, or we parse path
       const idMatch = path.match(/^\/master-table\/([^\/]+)$/);
       
+/*
       if ((idMatch || req.query.styleId) && req.method === 'PUT') {
         let styleId = req.query.styleId;
         if (!styleId && idMatch) {
@@ -149,6 +150,7 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Internal server error', details: err.message });
         }
       }
+*/
 
       // GET logic (unchanged fallback)
       const query = `SELECT * FROM ${tableName} ORDER BY style_id LIMIT 100;`;
